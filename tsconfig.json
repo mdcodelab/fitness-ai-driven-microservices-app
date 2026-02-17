@@ -20,6 +20,14 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/dtos": [
+        "libs/dtos/src"
+      ],
+      "@app/dtos/*": [
+        "libs/dtos/src/*"
+      ]
+    }
   }
 }
