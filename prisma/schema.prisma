@@ -1,17 +1,20 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // Generate into node_modules' internal folder so imports from '@prisma/client' resolve correctly
   output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+//
+// ENUMS
+//
+
+// Rol utilizator
+enum Role {
+  USER
+  ADMIN
 }
 
 // Enum pentru tipul activităților
@@ -32,21 +35,27 @@ enum ActivityType {
   CIRCUIT_TRAINING
 }
 
-// Modelul User
+//
+// MODELS
+//
+
 model User {
-  id         String       @id @default(uuid())
-  email      String       @unique
-  first_name String?
-  last_name  String?
-  password   String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  first_name  String?
+  last_name   String?
+  role        Role     @default(USER)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   activities   Activity[]
   aiResponses  AIResponse[]
+
+  @@index([email])
 }
 
-// Modelul Activity
 model Activity {
   id        String       @id @default(uuid())
   userId    String
@@ -54,21 +63,26 @@ model Activity {
   duration  Int?         // minute
   calories  Int?         // calorii estimate
   date      DateTime?
+
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  user       User        @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   aiResponses AIResponse[]
+
+  @@index([userId])
 }
 
-// Modelul AIResponse (recomandări generate)
 model AIResponse {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   userId        String
   activityId    String
-  recommendedAt DateTime  @default(now())
-  notes         String?   // ex: "Stretch after running"
+  recommendedAt DateTime @default(now())
+  notes         String?
 
-  user      User      @relation(fields: [userId], references: [id])
-  activity  Activity  @relation(fields: [activityId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([activityId])
 }
