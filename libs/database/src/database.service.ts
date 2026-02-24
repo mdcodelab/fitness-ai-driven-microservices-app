@@ -15,7 +15,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 		const PrismaPg = adapterPkg.PrismaPg ?? adapterPkg.default ?? adapterPkg;
 
 		// Pass an adapter instance created with the DATABASE_URL so the client can connect.
-		const adapterInstance = new PrismaPg({ url: process.env.DATABASE_URL });
+	// The pg.Pool constructor expects `connectionString` for a URL.
+	// Use the correct key so the adapter connects to the intended database.
+	const adapterInstance = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 		this.prisma = new PrismaClient({
 			adapter: adapterInstance,
 		});
