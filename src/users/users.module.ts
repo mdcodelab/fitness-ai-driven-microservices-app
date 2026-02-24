@@ -8,5 +8,6 @@ import { RabbitModule } from '@app/rabbit';
   imports: [DatabaseModule, RabbitModule],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
