@@ -10,4 +10,9 @@ export class ApiGatewayController {
   async register(@Body() body: CreateUserDto) {
     return this.usersService.create(body);
   }
+
+  @Post("login")
+  async login(@Body() body: { email: string; password: string }) {
+    return this.usersService.login(body.email, body.password);
+  }
 }
