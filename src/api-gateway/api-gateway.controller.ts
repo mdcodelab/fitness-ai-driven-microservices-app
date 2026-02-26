@@ -2,10 +2,14 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'libs/dtos/create.user.dto';
 import type { Response as ExpressResponse } from 'express';
+import { ActivitiesService } from 'src/activities/activities.service';
+import { CreateActivityDto } from 'libs/dtos/create.activity.dto';
 
 @Controller('api-gateway')
 export class ApiGatewayController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService,
+              private readonly activitiesService: ActivitiesService
+  ) {}
 
   @Post('register')
   async register(@Body() body: CreateUserDto) {
@@ -21,4 +25,9 @@ export class ApiGatewayController {
     logout(@Res({ passthrough: true }) res: ExpressResponse){
         return this.usersService.logout(res);
     }
+
+    @Post('activities')
+async createActivity(@Body() body: CreateActivityDto) {
+  return this.activitiesService.create(body);
+}
 }

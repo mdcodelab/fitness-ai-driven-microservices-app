@@ -8,5 +8,6 @@ import { DatabaseModule } from '@app/database';
   imports: [RabbitModule, DatabaseModule],
   controllers: [ActivitiesController],
   providers: [ActivitiesService],
+  exports: [ActivitiesService],
 })
 export class ActivitiesModule {}
