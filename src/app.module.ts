@@ -6,6 +6,7 @@ import { ApiGatewayModule } from './api-gateway/api-gateway.module';
 import { DatabaseModule } from '@app/database';
 import { UsersModule } from './users/users.module';
 import { ActivitiesModule } from './activities/activities.module';
+import { AiModule } from './ai/ai.module';
 import { RabbitModule } from '@app/rabbit';
 
 @Module({
@@ -14,11 +15,12 @@ import { RabbitModule } from '@app/rabbit';
       isGlobal: true,
     }),
 
-    DatabaseModule,
-    RabbitModule,
-    ApiGatewayModule,
-    UsersModule,
-    ActivitiesModule,
+  DatabaseModule,
+  RabbitModule,
+  ApiGatewayModule,
+  UsersModule,
+  ActivitiesModule,
+  AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
