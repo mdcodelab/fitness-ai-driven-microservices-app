@@ -1,23 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { DatabaseModule } from '@app/database';
 import { RabbitModule } from '@app/rabbit';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from 'libs/common/jwt.strategy';
 
 @Module({
   imports: [
     DatabaseModule,
     RabbitModule,
+    PassportModule, // 🔥 IMPORTANT
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
         const secret = config.get<string>('JWT_SECRET');
-        if (!secret) {
-          console.warn('[UsersModule] JWT_SECRET not set in environment; using temporary dev secret. Set JWT_SECRET in your .env for production.');
-        }
         return {
           secret: secret ?? 'dev-secret-please-set-in-env',
           signOptions: { expiresIn: '24h' },
@@ -26,7 +26,10 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [
+    UsersService,
+    JwtStrategy,
+  ],
   exports: [UsersService],
 })
 export class UsersModule {}

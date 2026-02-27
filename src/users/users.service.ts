@@ -75,7 +75,13 @@ export class UsersService {
   async logout(res: any) {
     // For JWT, logout is typically handled client-side by deleting the token.
     // Optionally, you could implement token blacklisting here.
-    res.clearCookie('jwt'); // If you were using cookies to store the token
+    // Clear both cookie names we accept so clients are fully logged out.
+    try {
+      res.clearCookie('jwt');
+      res.clearCookie('access_token');
+    } catch (err) {
+      // ignore if response not passed
+    }
     return { message: 'Logged out successfully' };
   }
 }

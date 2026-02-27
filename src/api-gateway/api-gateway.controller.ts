@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'libs/dtos/create.user.dto';
 import type { Response as ExpressResponse } from 'express';
 import { ActivitiesService } from 'src/activities/activities.service';
 import { CreateActivityDto } from 'libs/dtos/create.activity.dto';
+import { JwtAuthGuard } from 'libs/common/jwt.guard';
 
 @Controller('api-gateway')
 export class ApiGatewayController {
@@ -16,10 +17,25 @@ export class ApiGatewayController {
     return this.usersService.create(body);
   }
 
-  @Post("login")
-  async login(@Body() body: { email: string; password: string }) {
-    return this.usersService.login(body.email, body.password);
-  }
+  @Post('login')
+async login(
+  @Body() body: { email: string; password: string },
+  @Res({ passthrough: true }) res: any,
+) {
+  const result = await this.usersService.login(
+    body.email,
+    body.password,
+  );
+
+  res.cookie('access_token', result.access_token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false, // IMPORTANT pentru localhost
+  });
+
+  return { message: 'Logged in' };
+}
+
 
 @Post("logout")
     logout(@Res({ passthrough: true }) res: ExpressResponse){
@@ -27,7 +43,14 @@ export class ApiGatewayController {
     }
 
     @Post('activities')
-async createActivity(@Body() body: CreateActivityDto) {
-  return this.activitiesService.create(body);
+@UseGuards(JwtAuthGuard)
+async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
+  const userId = (req as any).user.id;
+
+  return this.activitiesService.create({
+    ...body,
+    userId,
+  });
 }
+
 }
