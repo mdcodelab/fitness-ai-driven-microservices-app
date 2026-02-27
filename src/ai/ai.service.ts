@@ -1,39 +1,54 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { DatabaseService } from '@app/database';
-import { CreateAIResponseDto } from '../../libs/dtos/create.ai.response.dto';
 import { RabbitService } from '@app/rabbit';
+import { DatabaseService } from '@app/database';
+import axios from 'axios';
 
 @Injectable()
 export class AIResponseService implements OnModuleInit {
   constructor(
-    private readonly databaseService: DatabaseService,
     private readonly rabbitService: RabbitService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   async onModuleInit() {
-    // Consuma mesajele de la activități
-    await this.rabbitService.consume('activity.queue', async (message) => {
-      const activity = JSON.parse(message.content.toString());
+    // Consumăm activitățile
+    await this.rabbitService.consume('activity.queue', async (msg) => {
+      if (!msg) return;
+      const activity = JSON.parse(msg.content.toString());
 
-      const aiResponse = {
-        activityId: activity.id,
-        userId: activity.userId,
-        recommendation: "Great job! Increase duration next time.",
-      };
+      try {
+        // 1️⃣ Trimitem activitatea către Genimi API pentru recomandare
+        const apiKey = process.env.GENIMI_API_KEY;
+        const response = await axios.post(
+          'https://api.genimi.ai/v1/recommend', 
+          {
+            userId: activity.userId,
+            activityType: activity.type,
+            duration: activity.duration,
+            calories: activity.calories,
+          },
+          {
+            headers: { Authorization: `Bearer ${apiKey}` },
+          }
+        );
 
-      await this.databaseService.client.aIResponse.create({
-        data: aiResponse,
-      });
+        // 2️⃣ Salvăm răspunsul AI în DB
+        const aiResponse = await this.databaseService.client.aIResponse.create({
+          data: {
+            activityId: activity.id,
+            userId: activity.userId,
+            notes: response.data.recommendation,
+          },
+        });
 
-      // Poți publica event dacă vrei
-      await this.rabbitService.publish(
-        'ai.exchange',
-        'ai.response.created',
-        aiResponse,
-      );
+        console.log('AI response saved:', aiResponse);
+      } catch (err) {
+        console.error('[AIResponseService] Error processing activity:', err);
+      }
     });
   }
 
+  // Optional: metode helper pentru alte query-uri
   async findByUser(userId: string) {
     return this.databaseService.client.aIResponse.findMany({
       where: { userId },
