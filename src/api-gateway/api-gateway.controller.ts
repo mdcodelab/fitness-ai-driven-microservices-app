@@ -55,6 +55,7 @@ async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
 
 
 //activitati alese de user
+@Get('user-activities')
 @UseGuards(JwtAuthGuard)
 async getUserActivities(@Req() req: Request) {
   const userId = (req as any).user.id;
@@ -68,5 +69,14 @@ async getUserActivities(@Req() req: Request) {
   async getAvailableActivities() {
     return this.activitiesService.findAll(); // toate activitiesTypes
   }
+
+  //get user details
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: Request) {
+    const userId = (req as any).user.id;
+    return this.usersService.findById(userId);
+}
+
 
 }

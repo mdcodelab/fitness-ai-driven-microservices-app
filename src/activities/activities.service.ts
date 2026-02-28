@@ -36,7 +36,7 @@ export class ActivitiesService {
   }
 
   async findAll() {
-    return this.databaseService.client.activity.findMany({
+    return this.databaseService.client.activityType.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }

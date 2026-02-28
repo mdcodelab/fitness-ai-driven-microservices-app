@@ -84,4 +84,17 @@ export class UsersService {
     }
     return { message: 'Logged out successfully' };
   }
+
+
+  async findById(id: string) {
+    const user = await this.databaseService.client.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        createdAt: true,
+      },
+    });
 }
