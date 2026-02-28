@@ -68,16 +68,28 @@ async function main() {
   ];
 
   for (const a of demoActivities) {
-    const act = await prisma.activity.create({
-      data: {
-        userId: user.id,
-        type: a.type as any,
-        duration: a.duration,
-        calories: a.calories,
-        date: new Date(),
-      },
-    });
-    console.log('Inserted demo activity:', act.id, act.typeId);
+    // Build the create data depending on whether ActivityType is a model
+    // (in which case prisma.activityType exists and we connect by unique name)
+    // or an enum (in which case the `type` scalar accepts the enum value).
+    const hasActivityTypeDelegate = Boolean((prisma as any).activityType);
+    const data: any = {
+      // use nested connect for the user relation
+      user: { connect: { id: user.id } },
+      duration: a.duration,
+      calories: a.calories,
+      date: new Date(),
+    };
+
+    if (hasActivityTypeDelegate) {
+      // connect to the ActivityType model by unique name
+      data.type = { connect: { name: a.type } };
+    } else {
+      // schema uses enum ActivityType; set enum value directly
+      data.type = a.type as any;
+    }
+
+    const act = await prisma.activity.create({ data });
+    console.log('Inserted demo activity:', act.id, act.typeId ?? (act as any).type);
   }
 }
 

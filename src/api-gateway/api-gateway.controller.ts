@@ -54,12 +54,19 @@ async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
 }
 
 
-@Get('activities')
+//activitati alese de user
 @UseGuards(JwtAuthGuard)
 async getUserActivities(@Req() req: Request) {
   const userId = (req as any).user.id;
 
   return this.activitiesService.findAllByUser(userId);
 }
+
+//lista completă de activități disponibile**
+  @Get('available-activities')
+  @UseGuards(JwtAuthGuard)
+  async getAvailableActivities() {
+    return this.activitiesService.findAll(); // toate activitiesTypes
+  }
 
 }
