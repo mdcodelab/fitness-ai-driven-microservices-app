@@ -10,28 +10,9 @@ datasource db {
 // ENUMS
 //
 
-// Rol utilizator
 enum Role {
   USER
   ADMIN
-}
-
-// Enum pentru tipul activităților
-enum ActivityType {
-  RUNNING
-  CYCLING
-  JUMP_ROPE
-  HIIT
-  WEIGHT_LIFTING
-  PUSH_UPS
-  SQUATS
-  PULL_UPS
-  KETTLEBELL
-  YOGA
-  STRETCHING
-  PILATES
-  CROSSFIT
-  CIRCUIT_TRAINING
 }
 
 //
@@ -55,10 +36,20 @@ model User {
   @@index([email])
 }
 
+model ActivityType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  createdAt   DateTime @default(now())
+
+  activities  Activity[]
+}
+
 model Activity {
   id        String       @id @default(uuid())
   userId    String
-  type      ActivityType
+  typeId    String?      // temporar optional
   duration  Int?         // minute
   calories  Int?         // calorii estimate
   date      DateTime?
@@ -66,10 +57,12 @@ model Activity {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      ActivityType? @relation(fields: [typeId], references: [id])
   aiResponses AIResponse[]
 
   @@index([userId])
+  @@index([typeId])
 }
 
 model AIResponse {

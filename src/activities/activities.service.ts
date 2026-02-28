@@ -10,10 +10,17 @@ export class ActivitiesService {
     private readonly rabbitService: RabbitService,
   ) {}
 
-  async create(data: CreateActivityDto) {
+  async create(data: CreateActivityDto & { userId: string }) {
     // 1️⃣ Salvăm activitatea în DB
     const activity = await this.databaseService.client.activity.create({
-      data,
+      data: {
+        userId: data.userId,
+        // map incoming typeId -> type (enum value expected by generated client)
+        type: data.typeId as any,
+        duration: data.duration,
+        calories: data.calories,
+        date: data.date ? new Date(data.date) : undefined,
+      },
     });
 
     console.log('Activity saved in DB:', activity);
@@ -29,16 +36,15 @@ export class ActivitiesService {
   }
 
   async findAll() {
-    return this.databaseService.client.activity.findMany();
+    return this.databaseService.client.activity.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findAllByUser(userId: string) {
-  return this.databaseService.client.activity.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-  });
+    return this.databaseService.client.activity.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
-
-
-}
-

@@ -1,12 +1,9 @@
-import { IsString, IsOptional, IsEnum, IsInt, IsDateString } from 'class-validator';
-import { ActivityType } from '@prisma/client'; // enumul tău Prisma
+import { IsString, IsOptional, IsInt, IsDateString, IsUUID } from 'class-validator';
 
 export class CreateActivityDto {
-  @IsString()
-  userId: string;
 
-  @IsEnum(ActivityType)
-  type: ActivityType;
+  @IsUUID()
+  typeId: string;
 
   @IsOptional()
   @IsInt()
@@ -20,4 +17,3 @@ export class CreateActivityDto {
   @IsDateString()
   date?: string; // data activității
 }
-
