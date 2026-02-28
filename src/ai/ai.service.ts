@@ -95,4 +95,61 @@ Calories burned: ${activity.calories || 'unknown'}.`;
       where: { activityId },
     });
   }
+
+  // Expose a helper to generate (or retrieve) an AI response for a single
+  // activity on demand (used by the controller). This mirrors the consumer
+  // logic but runs synchronously for the provided activity object.
+  async getAIResponse(activity: any) {
+    let recommendation = 'No recommendation available';
+
+    // Accept multiple env var names for the API key
+    const apiKey = process.env.GEMINI_API_KEY ?? process.env.GENIMI_API_KEY ?? process.env.AI_API_KEY;
+    const apiUrl = process.env.GEN_AI_API_URL ??
+      'https://api.google.ai/v1/models/gemini-1.5-flash-latest:generateContent';
+
+    if (!apiKey) {
+      console.warn('[AIResponseService] API key not set — returning fallback recommendation');
+    } else {
+      console.log('[AIResponseService] Calling AI API URL (controller):', apiUrl);
+
+      const prompt = `You are a fitness assistant.\nRecommend 5 ways for user ${activity.userId || 'unknown'} to improve ${activity.type || 'unknown'}.\nDuration: ${activity.duration || 'unknown'} minutes.\nCalories burned: ${activity.calories || 'unknown'}.`;
+
+      try {
+        const response = await axios.post(
+          `${apiUrl}?key=${apiKey}`,
+          {
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: prompt }],
+              },
+            ],
+            generationConfig: { temperature: 0.7 },
+          },
+          { headers: { 'Content-Type': 'application/json' } },
+        );
+
+        recommendation =
+          response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+          response.data?.recommendation ||
+          response.data?.choices?.[0]?.message?.content ||
+          recommendation;
+
+        console.log('[AIResponseService] AI provider response snippet (controller):', recommendation?.slice?.(0, 200));
+      } catch (err: any) {
+        console.error('[AIResponseService] Error calling AI provider (controller):', err.response?.data || err.message || err);
+      }
+    }
+
+    // Save the AIResponse to the database and return it
+    const aiResponse = await this.databaseService.client.aIResponse.create({
+      data: {
+        activityId: activity.id ?? activity.activityId ?? null,
+        userId: activity.userId ?? null,
+        notes: recommendation,
+      },
+    });
+
+    return aiResponse;
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, UseGuards, Get } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'libs/dtos/create.user.dto';
 import type { Response as ExpressResponse } from 'express';
@@ -51,6 +51,15 @@ async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
     ...body,
     userId,
   });
+}
+
+
+@Get('activities')
+@UseGuards(JwtAuthGuard)
+async getUserActivities(@Req() req: Request) {
+  const userId = (req as any).user.id;
+
+  return this.activitiesService.findAllByUser(userId);
 }
 
 }

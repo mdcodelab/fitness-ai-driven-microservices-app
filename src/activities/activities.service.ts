@@ -32,10 +32,13 @@ export class ActivitiesService {
     return this.databaseService.client.activity.findMany();
   }
 
-  async findByUser(userId: string) {
-    return this.databaseService.client.activity.findMany({
-      where: { userId },
-    });
-  }
+  async findAllByUser(userId: string) {
+  return this.databaseService.client.activity.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+
 }
 

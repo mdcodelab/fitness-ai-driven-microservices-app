@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { AIResponseService } from './ai-response.service';
+import { AIResponseService } from './ai.service';
 
 @Controller('ai')
 export class AiController {

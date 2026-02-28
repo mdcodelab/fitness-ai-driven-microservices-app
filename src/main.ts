@@ -13,6 +13,12 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  // main.ts
+app.enableCors({
+  origin: "http://localhost:3000",
+  credentials: true, // esențial pentru cookie HttpOnly
+});
+
   await app.listen(4000);
 }
 bootstrap();
