@@ -68,7 +68,11 @@ export class UsersService {
     const token = this.jwtService.sign(payload);
 
     return {
-      access_token: token,
+      access_token: token, user: {
+    id: user.id,
+    first_name: user.first_name,
+    email: user.email
+  }
     };
   }
 
@@ -97,4 +101,6 @@ export class UsersService {
         createdAt: true,
       },
     });
+    return user;
+  }
 }
