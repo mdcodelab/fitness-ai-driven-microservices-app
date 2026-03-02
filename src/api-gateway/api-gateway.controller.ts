@@ -3,13 +3,15 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'libs/dtos/create.user.dto';
 import type { Response as ExpressResponse } from 'express';
 import { ActivitiesService } from 'src/activities/activities.service';
+import { AIResponseService } from 'src/ai/ai.service';
 import { CreateActivityDto } from 'libs/dtos/create.activity.dto';
 import { JwtAuthGuard } from 'libs/common/jwt.guard';
 
 @Controller('api-gateway')
 export class ApiGatewayController {
   constructor(private readonly usersService: UsersService,
-              private readonly activitiesService: ActivitiesService
+              private readonly activitiesService: ActivitiesService,
+              private readonly aiService: AIResponseService
   ) {}
 
   @Post('register')
@@ -42,6 +44,8 @@ async login(
         return this.usersService.logout(res);
     }
 
+   
+    //userul alege o activitate
     @Post('activities')
 @UseGuards(JwtAuthGuard)
 async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
@@ -54,7 +58,7 @@ async createActivity(@Body() body: CreateActivityDto, @Req() req: Request) {
 }
 
 
-//activitati alese de user
+//lista activitatilor alese de user
 @Get('user-activities')
 @UseGuards(JwtAuthGuard)
 async getUserActivities(@Req() req: Request) {
@@ -78,5 +82,11 @@ async getUserActivities(@Req() req: Request) {
     return this.usersService.findById(userId);
 }
 
+@Get("recom")
+@UseGuards(JwtAuthGuard)
+async getRecommendations(@Req() req: Request) {
+  const userId = (req as any).user.id;
+  return this.aiService.findAllRecByUser(userId);
+}
 
 }

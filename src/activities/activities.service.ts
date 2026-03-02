@@ -10,22 +10,32 @@ export class ActivitiesService {
     private readonly rabbitService: RabbitService,
   ) {}
 
+  // ✅ Creare activitate (post)
   async create(data: CreateActivityDto & { userId: string }) {
-    // 1️⃣ Salvăm activitatea în DB
+    // 1️⃣ Găsim ActivityType după ID
+    const activityType = await this.databaseService.client.activityType.findUnique({
+      where: { id: data.typeId },
+    });
+
+    if (!activityType) {
+      throw new Error('Invalid activity type');
+    }
+
+    // 2️⃣ Salvăm activitatea în DB
     const activity = await this.databaseService.client.activity.create({
       data: {
         userId: data.userId,
-        // map incoming typeId -> type (enum value expected by generated client)
-        type: data.typeId as any,
+        typeId: activityType.id, // FK către ActivityType
         duration: data.duration,
         calories: data.calories,
         date: data.date ? new Date(data.date) : undefined,
       },
+      include: { type: true }, // 🔥 Include ActivityType pentru name
     });
 
     console.log('Activity saved in DB:', activity);
 
-    // 2️⃣ Publicăm event în RabbitMQ
+    // 3️⃣ Publicăm event în RabbitMQ
     await this.rabbitService.publish(
       'activity.exchange',
       'activity.created',
@@ -35,15 +45,18 @@ export class ActivitiesService {
     return activity;
   }
 
+  // ✅ Toate ActivityType-urile disponibile
   async findAll() {
     return this.databaseService.client.activityType.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
+  // ✅ Activitățile unui user (include type pentru name)
   async findAllByUser(userId: string) {
     return this.databaseService.client.activity.findMany({
       where: { userId },
+      include: { type: true }, // 🔥 aici avem name
       orderBy: { createdAt: 'desc' },
     });
   }

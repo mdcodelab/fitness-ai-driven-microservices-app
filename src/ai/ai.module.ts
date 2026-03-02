@@ -8,5 +8,6 @@ import { DatabaseModule } from '@app/database';
   imports: [RabbitModule, DatabaseModule],
   controllers: [AiController],
   providers: [AIResponseService],
+  exports: [AIResponseService],
 })
 export class AiModule {}

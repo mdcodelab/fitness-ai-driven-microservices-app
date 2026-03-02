@@ -152,4 +152,11 @@ Calories burned: ${activity.calories || 'unknown'}.`;
 
     return aiResponse;
   }
+
+
+  async findAllRecByUser(userId: string) {
+    return this.databaseService.client.aIResponse.findMany({
+      where: { userId },
+    });
+  }
 }
