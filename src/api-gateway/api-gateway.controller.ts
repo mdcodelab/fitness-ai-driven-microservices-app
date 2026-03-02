@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, Req, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, UseGuards, Get, Delete, Param } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'libs/dtos/create.user.dto';
 import type { Response as ExpressResponse } from 'express';
@@ -82,11 +82,20 @@ async getUserActivities(@Req() req: Request) {
     return this.usersService.findById(userId);
 }
 
+//get all 
 @Get("recom")
 @UseGuards(JwtAuthGuard)
 async getRecommendations(@Req() req: Request) {
   const userId = (req as any).user.id;
   return this.aiService.findAllRecByUser(userId);
+}
+
+//delete recommendation
+@Delete("delete-recom/:id")
+@UseGuards(JwtAuthGuard)
+async deleteRecommendation(@Param('id') id: string, @Req() req: Request) {
+  const userId = (req as any).user.id;
+  return this.aiService.deleteReco(userId, id);
 }
 
 }

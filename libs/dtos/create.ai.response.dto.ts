@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsDateString, MaxLength } from 'class-validator';
 
 export class CreateAIResponseDto {
   @IsString()
@@ -13,5 +13,6 @@ export class CreateAIResponseDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200, { message: 'Notes cannot exceed 200 characters' })
   notes?: string;
 }

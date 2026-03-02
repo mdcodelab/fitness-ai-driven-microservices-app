@@ -159,4 +159,26 @@ Calories burned: ${activity.calories || 'unknown'}.`;
       where: { userId },
     });
   }
+
+  async deleteReco(userId: string, recoId: string) {
+    // First, verify that the recommendation belongs to the user
+    const reco = await this.databaseService.client.aIResponse.findUnique({
+      where: { id: recoId },
+    });
+
+    if (!reco) {
+      throw new Error('Recommendation not found');
+    }
+
+    if (reco.userId !== userId) {
+      throw new Error('Unauthorized to delete this recommendation');
+    }
+
+    // If verification passes, delete the recommendation
+    await this.databaseService.client.aIResponse.delete({
+      where: { id: recoId },
+    });
+
+    return { success: true };
+  }
 }
