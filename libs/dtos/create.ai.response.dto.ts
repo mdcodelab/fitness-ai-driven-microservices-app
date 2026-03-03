@@ -13,6 +13,6 @@ export class CreateAIResponseDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(200, { message: 'Notes cannot exceed 200 characters' })
+  @MaxLength(150, { message: 'Notes cannot exceed 150 characters' })
   notes?: string;
 }

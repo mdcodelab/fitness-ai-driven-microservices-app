@@ -90,6 +90,14 @@ async getRecommendations(@Req() req: Request) {
   return this.aiService.findAllRecByUser(userId);
 }
 
+//delete activity
+@Delete("delete-activity/:id")
+@UseGuards(JwtAuthGuard)
+async deleteActivity(@Param('id') id: string, @Req() req: Request) {
+  const userId = (req as any).user.id;
+  return this.activitiesService.deleteActivity(userId, id);
+}
+
 //delete recommendation
 @Delete("delete-recom/:id")
 @UseGuards(JwtAuthGuard)

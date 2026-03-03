@@ -60,4 +60,26 @@ export class ActivitiesService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  //delete activity
+  async deleteActivity(userId: string, activityId: string) {
+    // Verificăm dacă activitatea există și aparține userului
+    const activity = await this.databaseService.client.activity.findFirst({
+      where: { id: activityId, userId },
+    });
+
+    if (!activity) {
+      throw new Error('Activity not found or does not belong to user');
+    }
+
+    // Ștergem activitatea
+    await this.databaseService.client.activity.delete({
+      where: { id: activityId },
+    });
+
+    console.log(`Activity ${activityId} deleted for user ${userId}`);
+
+    return { message: 'Activity deleted successfully' };
+}
+
 }
